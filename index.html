@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>オアシス第二病院　重度認知症デイ｜人員収支シミュレーター</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#1f2937;--muted:#64748b;--line:#dbe3ee;--primary:#2563eb;--primary2:#1d4ed8;--good:#047857;--bad:#b91c1c;--warn:#b45309;--neutral:#475569}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text)}
+header{background:linear-gradient(135deg,#173b72,#2563eb);color:#fff;padding:24px 18px}
+header h1{margin:0 0 5px;font-size:24px} header p{margin:0;opacity:.9;font-size:14px}
+main{max-width:1240px;margin:20px auto;padding:0 14px 40px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(15,23,42,.05)}
+.span6{grid-column:span 6}.span12{grid-column:span 12}
+h2{font-size:18px;margin:0 0 14px}.sub{font-size:13px;color:var(--muted);margin:-5px 0 14px;line-height:1.65}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 14px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+input{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px;background:#fff}
+input:focus{outline:2px solid #bfdbfe;border-color:#60a5fa}
+.unit{position:relative}.unit span{position:absolute;right:10px;top:35px;font-size:12px;color:var(--muted);pointer-events:none}.unit input{padding-right:55px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:9px 7px;text-align:right}th:first-child,td:first-child{text-align:left}th{font-size:12px;color:#475569;background:#f8fafc}td input{padding:7px 8px;min-width:74px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:9px;padding:11px 16px;font-weight:700;cursor:pointer}.primary{background:var(--primary);color:#fff}.primary:hover{background:var(--primary2)}.secondary{background:#e2e8f0;color:#334155}
+.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.kpi{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfdff}.kpi .name{font-size:12px;color:var(--muted);font-weight:700}.kpi .val{font-size:23px;font-weight:800;margin-top:5px}.kpi .note{font-size:11px;color:var(--muted);margin-top:3px}.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}.neutral{color:var(--neutral)}
+.summarybox{background:#eff6ff;border-left:4px solid var(--primary);padding:13px 14px;border-radius:8px;margin-top:12px;font-size:14px;line-height:1.7}.small{font-size:12px;color:var(--muted);line-height:1.7}.tag{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:800;white-space:nowrap}.tag.good{background:#d1fae5}.tag.bad{background:#fee2e2}.tag.warn{background:#fef3c7}.tag.neutral{background:#e2e8f0}
+@media(max-width:850px){.span6{grid-column:span 12}.results{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.formgrid,.results{grid-template-columns:1fr}table{font-size:12px}.card{padding:13px;overflow-x:auto}}
+@media print{header,.actions{display:none}body{background:#fff}.card{box-shadow:none}main{margin:0}.span6{grid-column:span 6}}
+</style>
+</head>
+<body>
+<header><h1>オアシス第二病院　重度認知症デイ</h1><p>目標利益率・損益分岐点から、現在の職種別人員の不足・余剰を試算</p></header>
+<div style="background:#fff7ed;border-bottom:1px solid #fed7aa;padding:10px 18px;font-size:13px;color:#9a3412;">
+  <b>共有用シミュレーター</b>：入力した数値はこのブラウザ上で計算されます。ファイルを他者へ共有する場合は、このHTMLファイルを添付してください。
+</div>
+
+<main><div class="grid">
+<section class="card span6"><h2>① 売上条件</h2><p class="sub">2単位合計の利用者数で入力します。</p><div class="formgrid">
+<div class="unit"><label>1日あたり利用者数</label><input id="users" type="number" min="0" step="1" value="20"><span>人/日</span></div>
+<div class="unit"><label>1日あたり利用単価</label><input id="unitPrice" type="number" min="0" value="10500"><span>円/人</span></div>
+<div class="unit"><label>1日あたり1人あたり加算</label><input id="addon" type="number" min="0" value="1200"><span>円/人</span></div>
+<div class="unit"><label>月間営業日数</label><input id="days" type="number" min="1" value="25"><span>日/月</span></div>
+</div></section>
+<section class="card span6"><h2>② その他経費・目標利益</h2><p class="sub">人件費以外の月額経費と、目標とする利益率を入力します。</p><div class="formgrid">
+<div class="unit"><label>その他経費（月額）</label><input id="otherCost" type="number" min="0" value="500000"><span>円/月</span></div>
+<div class="unit"><label>目標利益率</label><input id="targetMargin" type="number" min="0" max="90" step="0.1" value="10"><span>%</span></div>
+</div></section>
+<section class="card span12"><h2>③ 職種別人件費・現在人数</h2><p class="sub">「1人あたり月額報酬（平均）」は給与・賞与按分・法定福利費等を含む総人件費の平均を入力してください。</p>
+<table><thead><tr><th>職種</th><th>1人あたり月額報酬（平均）</th><th>現在人数</th></tr></thead><tbody id="staffRows"></tbody></table>
+<div class="actions"><button class="primary" onclick="calculate()">計算する</button><button class="secondary" onclick="resetDefaults()">初期値に戻す</button><button class="secondary" onclick="window.print()">印刷</button></div></section>
+<section class="card span12"><h2>④ シミュレーション結果</h2><div class="results">
+<div class="kpi"><div class="name">月額売上</div><div class="val" id="rRevenue">―</div></div>
+<div class="kpi"><div class="name">月額費用</div><div class="val" id="rCost">―</div><div class="note">人件費＋その他経費</div></div>
+<div class="kpi"><div class="name">月間利益</div><div class="val" id="rProfit">―</div></div>
+<div class="kpi"><div class="name">現在利益率</div><div class="val" id="rMargin">―</div></div>
+<div class="kpi"><div class="name">目標利益率</div><div class="val" id="rTargetMargin">―</div></div>
+<div class="kpi"><div class="name">損益分岐点 利用者数</div><div class="val" id="rBEUsers">―</div><div class="note">1日あたり</div></div>
+<div class="kpi"><div class="name">目標利益率達成 利用者数</div><div class="val" id="rTargetUsers">―</div><div class="note">1日あたり</div></div>
+<div class="kpi"><div class="name">月額人件費</div><div class="val" id="rPersonnel">―</div></div>
+</div><div class="summarybox" id="statusText">「計算する」を押すと結果を表示します。</div>
+<h2 style="margin-top:20px">⑤ 職種別 人員収支判定</h2>
+<p class="sub">各職種について、<b>他の職種の人数は現在のまま固定</b>し、その職種だけを増減した場合に、目標利益率または損益分岐点を維持できる人数を試算します。</p>
+<table><thead><tr><th>職種</th><th>現在人数</th><th>目標利益率ベース</th><th>損益分岐点ベース</th><th>判定</th></tr></thead><tbody id="balanceRows"></tbody></table>
+<p class="small">※「不足」は収支上その人数まで増員余地があること、「余剰」はその人数分を減らさないと設定した収支基準を満たさないことを示します。これは法令上・運営上の必要人員を示すものではありません。<br>※指定基準、加算要件、専従・兼務、常勤換算、勤務時間等は別途確認してください。</p>
+</section></div></main>
+<script>
+const defaultStaff=[
+{name:"医師",salary:900000,employed:1},
+{name:"看護師",salary:420000,employed:3},
+{name:"作業療法士",salary:380000,employed:3},
+{name:"精神保健福祉士",salary:350000,employed:2},
+{name:"介護職員",salary:300000,employed:8}
+];
+function renderStaff(data=defaultStaff){const tb=document.getElementById("staffRows");tb.innerHTML="";data.forEach((s,i)=>{const tr=document.createElement("tr");tr.innerHTML=`<td><b>${s.name}</b></td><td><input id="sal${i}" type="number" min="0" value="${s.salary}"></td><td><input id="emp${i}" type="number" min="0" step="0.1" value="${s.employed}"></td>`;tb.appendChild(tr);});}
+const yen=n=>new Intl.NumberFormat('ja-JP',{style:'currency',currency:'JPY',maximumFractionDigits:0}).format(n);
+const num=id=>Number(document.getElementById(id).value)||0;
+function getStaff(){return defaultStaff.map((s,i)=>({name:s.name,salary:num("sal"+i),employed:num("emp"+i)}));}
+function signedDiff(target,current){const d=target-current;if(Math.abs(d)<0.05)return {text:"±0名",cls:"good",raw:0};if(d>0)return {text:d.toFixed(1)+"名不足",cls:"warn",raw:d};return {text:Math.abs(d).toFixed(1)+"名余剰",cls:"bad",raw:d};}
+function maxCountForRole(staff,index,laborBudget){const others=staff.reduce((sum,s,i)=>sum+(i===index?0:s.salary*s.employed),0);const sal=staff[index].salary;if(sal<=0)return staff[index].employed;return Math.max(0,(laborBudget-others)/sal);}
+function calculate(){
+ const users=Math.round(num("users")),price=num("unitPrice"),addon=num("addon"),days=num("days"),other=num("otherCost"),targetMargin=num("targetMargin")/100,staff=getStaff();
+ const revPerUser=price+addon,revenue=users*revPerUser*days,personnel=staff.reduce((a,s)=>a+s.salary*s.employed,0),totalCost=personnel+other,profit=revenue-totalCost,margin=revenue>0?profit/revenue:0;
+ const beUsers=revPerUser*days>0?totalCost/(revPerUser*days):0;
+ const targetUsers=revPerUser*days*(1-targetMargin)>0?totalCost/(revPerUser*days*(1-targetMargin)):0;
+ const breakEvenLaborBudget=Math.max(0,revenue-other);
+ const targetLaborBudget=Math.max(0,revenue*(1-targetMargin)-other);
+ document.getElementById("rRevenue").textContent=yen(revenue);document.getElementById("rCost").textContent=yen(totalCost);document.getElementById("rPersonnel").textContent=yen(personnel);
+ const rp=document.getElementById("rProfit");rp.textContent=yen(profit);rp.className="val "+(profit>=0?"good":"bad");
+ const rm=document.getElementById("rMargin");rm.textContent=(margin*100).toFixed(1)+"%";rm.className="val "+(margin>=targetMargin?"good":margin>=0?"warn":"bad");
+ document.getElementById("rTargetMargin").textContent=(targetMargin*100).toFixed(1)+"%";
+ document.getElementById("rBEUsers").textContent=Math.ceil(beUsers)+"人/日";document.getElementById("rTargetUsers").textContent=Math.ceil(targetUsers)+"人/日";
+ let msg="";if(profit<0){msg=`<b class="bad">現在の条件では赤字です。</b> 損益分岐点は <b>${Math.ceil(beUsers)}人/日</b>、目標利益率 ${(targetMargin*100).toFixed(1)}% の達成には <b>${Math.ceil(targetUsers)}人/日</b>が目安です。`;}else if(margin<targetMargin){msg=`<b class="warn">黒字ですが目標利益率には届いていません。</b> 現在利益率は <b>${(margin*100).toFixed(1)}%</b>、目標利益率達成には <b>${Math.ceil(targetUsers)}人/日</b>が目安です。`;}else{msg=`<b class="good">現在の条件では目標利益率を確保しています。</b> 現在利益率は <b>${(margin*100).toFixed(1)}%</b>、損益分岐点は <b>${Math.ceil(beUsers)}人/日</b>です。`;}
+ document.getElementById("statusText").innerHTML=msg;
+ const tb=document.getElementById("balanceRows");tb.innerHTML="";
+ staff.forEach((s,i)=>{
+   const targetCount=maxCountForRole(staff,i,targetLaborBudget);
+   const beCount=maxCountForRole(staff,i,breakEvenLaborBudget);
+   const td=signedDiff(targetCount,s.employed),bd=signedDiff(beCount,s.employed);
+   let overall="";let cls="good";
+   if(td.raw<0){overall=`目標利益率に対し ${Math.abs(td.raw).toFixed(1)}名余剰`;cls="bad";}
+   else if(td.raw>0){overall=`目標利益率に対し ${td.raw.toFixed(1)}名不足`;cls="warn";}
+   else{overall="目標利益率に対し適正";cls="good";}
+   tb.innerHTML+=`<tr><td><b>${s.name}</b></td><td>${s.employed.toFixed(1)}名</td><td><span class="tag ${td.cls}">${td.text}</span></td><td><span class="tag ${bd.cls}">${bd.text}</span></td><td><span class="tag ${cls}">${overall}</span></td></tr>`;
+ });
+}
+function resetDefaults(){document.getElementById("users").value=20;document.getElementById("unitPrice").value=10500;document.getElementById("addon").value=1200;document.getElementById("days").value=25;document.getElementById("otherCost").value=500000;document.getElementById("targetMargin").value=10;renderStaff(defaultStaff);calculate();}
+renderStaff();calculate();
+</script>
+</body></html>
