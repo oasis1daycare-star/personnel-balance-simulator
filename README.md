@@ -1,0 +1,2 @@
+# personnel-balance-simulator
+人員収支シミュレーターのHTMLファイルを公開するためのリポジトリ
